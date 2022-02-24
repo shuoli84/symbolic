@@ -59,6 +59,8 @@ impl SymCacheConverter {
     ///
     /// Every [`transform::Function`] and [`transform::SourceLocation`] will be passed through
     /// this transformer before it is being written to the SymCache.
+    ///
+    /// Transformers are visited in the order they were added.
     pub fn add_transformer<T>(&mut self, t: T)
     where
         T: transform::Transformer + 'static,
