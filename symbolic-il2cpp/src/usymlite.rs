@@ -16,7 +16,7 @@ use anyhow::{Error, Result};
 #[derive(Debug, Clone)]
 #[repr(C)]
 struct UsymLiteHeader {
-    /// Magic number identifying the file, `b"usym"`.
+    /// Magic number identifying the file, `b"sym-"`.
     magic: u32,
     /// Version of the usym file format.
     version: u32,
@@ -48,7 +48,7 @@ pub struct UsymLiteSymbols<'a> {
     /// The string table.
     ///
     /// This is a large slice of bytes with null-terminated C strings.
-    stringtable: &'a [u8],
+    string_table: &'a [u8],
 }
 
 impl<'a> UsymLiteSymbols<'a> {
@@ -100,7 +100,7 @@ impl<'a> UsymLiteSymbols<'a> {
         Ok(Self {
             header,
             lines,
-            stringtable,
+            string_table: stringtable,
         })
     }
 
@@ -110,11 +110,11 @@ impl<'a> UsymLiteSymbols<'a> {
     fn get_string(&self, offset: u32) -> Option<&'a CStr> {
         // Panic if size_of::<usize>() < size_of::<u32>().
         let offset: usize = offset.try_into().unwrap();
-        if offset >= self.stringtable.len() {
+        if offset >= self.string_table.len() {
             return None;
         }
 
-        let table_ptr = self.stringtable.as_ptr();
+        let table_ptr = self.string_table.as_ptr();
 
         // SAFETY: We checked offset is inside the stringtable.
         let string_ptr = unsafe { table_ptr.add(offset) as *const c_char };
